@@ -3,6 +3,7 @@ package com.example.sqs;
 import com.example.BaseQueueService;
 import com.example.dto.MessageToSend;
 import com.example.dto.QueueMessage;
+import com.example.exception.UnknownQueueException;
 import com.example.utils.QueueNameValidator;
 import com.example.utils.VisibilityTimeoutValidator;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -74,12 +75,16 @@ public class SqsQueueService extends BaseQueueService {
                 .queueUrl(getQueueUrl(queueName))
                 .receiptHandle(queueMessage.getUniqueIdentifier())
                 .build();
-        sqsClient.deleteMessage(deleteMessageRequest);
+            sqsClient.deleteMessage(deleteMessageRequest);
     }
 
     private String getQueueUrl(String queueName) {
-        GetQueueUrlRequest request = GetQueueUrlRequest.builder().queueName(queueName).build();
-        GetQueueUrlResponse getQueueUrlResponse = sqsClient.getQueueUrl(request);
-        return getQueueUrlResponse.queueUrl();
+        try{
+            GetQueueUrlRequest request = GetQueueUrlRequest.builder().queueName(queueName).build();
+            GetQueueUrlResponse getQueueUrlResponse = sqsClient.getQueueUrl(request);
+            return getQueueUrlResponse.queueUrl();
+        }catch(QueueDoesNotExistException qdsee){
+            throw new UnknownQueueException(qdsee);
+        }
     }
 }
