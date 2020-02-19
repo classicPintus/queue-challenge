@@ -1,11 +1,11 @@
-package com.example.message;
+package com.example.dto;
 
-public class MessageReceived {
+public class QueueMessage {
 
     private String body;
     private String uniqueIdentifier;
 
-    public MessageReceived(String body, String uniqueIdentifier){
+    public QueueMessage(String body, String uniqueIdentifier){
         this.body = body;
         this.uniqueIdentifier = uniqueIdentifier;
     }

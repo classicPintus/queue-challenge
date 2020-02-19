@@ -1,10 +1,10 @@
-package com.example.message;
+package com.example.dto;
 
 public class MessageToSend {
 
     private String body;
 
-    public MessageToSend(String body){
+    public MessageToSend(String body) {
         this.body = body;
     }
 
@@ -12,7 +12,4 @@ public class MessageToSend {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
 }

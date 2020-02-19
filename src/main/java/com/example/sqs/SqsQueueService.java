@@ -1,8 +1,11 @@
-package com.example;
+package com.example.sqs;
 
+import com.example.QueueChallengeUtils;
+import com.example.QueueService;
 import com.example.exception.InvalidQueueNameException;
-import com.example.message.MessageReceived;
-import com.example.message.MessageToSend;
+import com.example.exception.InvalidVisibilityTimeoutException;
+import com.example.dto.QueueMessage;
+import com.example.dto.MessageToSend;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 import software.amazon.awssdk.utils.CollectionUtils;
@@ -19,14 +22,20 @@ public class SqsQueueService implements QueueService {
     }
 
     @Override
-    public void createQueue(String queueName) {
+    public void createQueue(String queueName, int visibilityTimeout) {
 
         if (StringUtils.isBlank(queueName) || !queueName.matches("^[a-zA-Z0-9\\-_]{1,75}\\.fifo$")) {
             throw new InvalidQueueNameException();
         }
 
+        if (visibilityTimeout < QueueChallengeUtils.MIN_VISIBILITY_TIMEOUT ||
+                visibilityTimeout > QueueChallengeUtils.MAX_VISIBILITY_TIMEOUT) {
+            throw new InvalidVisibilityTimeoutException();
+        }
+
         Map<QueueAttributeName, String> attributes = new HashMap<>();
         attributes.put(QueueAttributeName.FIFO_QUEUE, "true");
+        attributes.put(QueueAttributeName.VISIBILITY_TIMEOUT, String.valueOf(visibilityTimeout));
         CreateQueueRequest createQueueRequest = CreateQueueRequest.builder()
                 .queueName(queueName)
                 .attributes(attributes)
@@ -53,8 +62,8 @@ public class SqsQueueService implements QueueService {
     }
 
     @Override
-    public Optional<MessageReceived> pull(String queueName) {
-        Optional<MessageReceived> res = Optional.empty();
+    public Optional<QueueMessage> pull(String queueName) {
+        Optional<QueueMessage> res = Optional.empty();
 
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(getQueueUrl(queueName))
@@ -64,17 +73,17 @@ public class SqsQueueService implements QueueService {
 
         if (!CollectionUtils.isNullOrEmpty(messages)) {
             Message messageFromAws = messages.get(0);
-            res = Optional.of(new MessageReceived(messageFromAws.body(), messageFromAws.receiptHandle()));
+            res = Optional.of(new QueueMessage(messageFromAws.body(), messageFromAws.receiptHandle()));
         }
 
         return res;
     }
 
     @Override
-    public void delete(String queueName, MessageReceived messageReceived) {
+    public void delete(String queueName, QueueMessage queueMessage) {
         DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
                 .queueUrl(getQueueUrl(queueName))
-                .receiptHandle(messageReceived.getUniqueIdentifier())
+                .receiptHandle(queueMessage.getUniqueIdentifier())
                 .build();
         sqsClient.deleteMessage(deleteMessageRequest);
     }

@@ -1,4 +1,4 @@
-package com.example;
+package com.example.file;
 
 public class FileQueueService  {
   //
