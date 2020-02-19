@@ -6,6 +6,10 @@ class QueueWrapper {
     private String name;
     private int visibilityTimeout;
 
+    public QueueWrapper(String name) {
+        this.name = name;
+    }
+
     public QueueWrapper(String name, int visibilityTimeout) {
         this.name = name;
         this.visibilityTimeout = visibilityTimeout;
