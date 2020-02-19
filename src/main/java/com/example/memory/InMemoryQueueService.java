@@ -1,8 +1,13 @@
 package com.example.memory;
 
+import com.example.BaseQueueService;
 import com.example.QueueService;
-import com.example.dto.QueueMessage;
 import com.example.dto.MessageToSend;
+import com.example.dto.QueueMessage;
+import com.example.exception.InvalidQueueNameException;
+import com.example.exception.InvalidVisibilityTimeoutException;
+import com.example.utils.QueueNameValidator;
+import com.example.utils.VisibilityTimeoutValidator;
 
 import java.util.Deque;
 import java.util.Map;
@@ -10,22 +15,24 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class InMemoryQueueService implements QueueService {
+public class InMemoryQueueService extends BaseQueueService {
 
-    private Map<String, Deque<QueueMessage>> queues;
+    private final Map<QueueWrapper, Deque<QueueMessage>> queues;
 
-    public InMemoryQueueService() {
+    public InMemoryQueueService(QueueNameValidator queueNameValidator,
+                                VisibilityTimeoutValidator visibilityTimeoutValidator) {
+        super(queueNameValidator, visibilityTimeoutValidator);
         queues = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void createQueue(String queueName, int visibilityTimeout) {
-        this.queues.computeIfAbsent(queueName, key -> new ConcurrentLinkedDeque<>());
+    protected void doCreateQueue(String queueName, int visibilityTimeout) {
+        this.queues.computeIfAbsent(new QueueWrapper(queueName, visibilityTimeout), key -> new ConcurrentLinkedDeque<>());
     }
 
     @Override
     public void deleteQueue(String queueName) {
-        this.queues.remove(queueName);
+        this.queues.remove(new QueueWrapper(queueName, 0));
     }
 
     @Override

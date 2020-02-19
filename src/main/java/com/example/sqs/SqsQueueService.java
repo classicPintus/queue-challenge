@@ -1,38 +1,27 @@
 package com.example.sqs;
 
-import com.example.QueueChallengeUtils;
-import com.example.QueueService;
-import com.example.exception.InvalidQueueNameException;
-import com.example.exception.InvalidVisibilityTimeoutException;
-import com.example.dto.QueueMessage;
+import com.example.BaseQueueService;
 import com.example.dto.MessageToSend;
+import com.example.dto.QueueMessage;
+import com.example.utils.QueueNameValidator;
+import com.example.utils.VisibilityTimeoutValidator;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 import software.amazon.awssdk.utils.CollectionUtils;
-import software.amazon.awssdk.utils.StringUtils;
 
 import java.util.*;
 
-public class SqsQueueService implements QueueService {
+public class SqsQueueService extends BaseQueueService {
     private final SqsClient sqsClient;
 
-    public SqsQueueService() {
-        sqsClient = SqsClient.builder()
-                .build();
+    public SqsQueueService(QueueNameValidator queueNameValidator,
+                           VisibilityTimeoutValidator visibilityTimeoutValidator) {
+        super(queueNameValidator, visibilityTimeoutValidator);
+        this.sqsClient = SqsClient.builder().build();
     }
 
     @Override
-    public void createQueue(String queueName, int visibilityTimeout) {
-
-        if (StringUtils.isBlank(queueName) || !queueName.matches("^[a-zA-Z0-9\\-_]{1,75}\\.fifo$")) {
-            throw new InvalidQueueNameException();
-        }
-
-        if (visibilityTimeout < QueueChallengeUtils.MIN_VISIBILITY_TIMEOUT ||
-                visibilityTimeout > QueueChallengeUtils.MAX_VISIBILITY_TIMEOUT) {
-            throw new InvalidVisibilityTimeoutException();
-        }
-
+    protected void doCreateQueue(String queueName, int visibilityTimeout) {
         Map<QueueAttributeName, String> attributes = new HashMap<>();
         attributes.put(QueueAttributeName.FIFO_QUEUE, "true");
         attributes.put(QueueAttributeName.VISIBILITY_TIMEOUT, String.valueOf(visibilityTimeout));

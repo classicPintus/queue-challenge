@@ -1,6 +1,6 @@
 package com.example.exception;
 
-import com.example.QueueChallengeUtils;
+import com.example.utils.QueueChallengeUtils;
 
 public class InvalidVisibilityTimeoutException extends RuntimeException {
 
