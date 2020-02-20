@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseUnitTest {
+public abstract class BaseUnitTest {
 
     protected QueueService target;
 
