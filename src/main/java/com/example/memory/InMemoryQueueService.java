@@ -58,7 +58,7 @@ public class InMemoryQueueService extends BaseQueueService {
         if (queueMessage != null) {
             res = Optional.of(queueMessage);
             hiddenMessages.get(queue).add(queueMessage);
-            TIMER.schedule(new VisibilityTimeoutTimerTask(queueMessage, queue), queue.getVisibilityTimeout());
+            TIMER.schedule(new VisibilityTimeoutTimerTask(queueMessage, queue), queue.getVisibilityTimeout() * 1000L);
         } else {
             res = Optional.empty();
         }
