@@ -17,6 +17,9 @@
         <junit.version>4.13</junit.version>
         <mockito.version>3.2.4</mockito.version>
 
+        <!-- PLUGINS -->
+        <plugin.compiler.version>3.8.1</plugin.compiler.version>
+
     </properties>
 
     <dependencyManagement>
@@ -69,6 +72,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${plugin.compiler.version}</version>
                 <configuration>
                     <compilerArgument>-Xlint:all</compilerArgument>
                     <encoding>UTF-8</encoding>
